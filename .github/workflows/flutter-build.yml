@@ -616,6 +616,24 @@ jobs:
           # for easy debugging
           flutter build ipa --release --no-codesign
 
+      - name: Package unsigned IPA
+        shell: bash
+        run: |
+          # Flutter 3.24.5 writes the xcarchive and then skips the IPA when
+          # --no-codesign is set. An IPA is a zip whose root is Payload/<App>.app.
+          cd flutter
+          shopt -s nullglob
+          app=(build/ios/archive/*.xcarchive/Products/Applications/*.app)
+          if [[ ${#app[@]} -ne 1 ]]; then
+            echo "expected one unsigned .app in the xcarchive, found ${#app[@]}" >&2
+            exit 1
+          fi
+          rm -rf build/ios/ipa
+          mkdir -p build/ios/ipa/Payload
+          ditto "${app[0]}" "build/ios/ipa/Payload/$(basename "${app[0]}")"
+          ditto -c -k --keepParent build/ios/ipa/Payload "build/ios/ipa/rustdesk-${VERSION}.ipa"
+          rm -rf build/ios/ipa/Payload
+
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
