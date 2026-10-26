@@ -555,9 +555,12 @@ jobs:
 
       - name: Install vcpkg dependencies
         run: |
+          # Host-only overlay. CMake 4 leaves CMAKE_OSX_SYSROOT empty, and this
+          # vcpkg then passes a bare -isysroot to meson (pkgconf:x64-osx).
           if ! $VCPKG_ROOT/vcpkg \
             install \
             --triplet ${{ matrix.job.vcpkg-triplet }} \
+            --overlay-triplets "${{ github.workspace }}/.github/vcpkg-triplets" \
             --x-install-root="$VCPKG_ROOT/installed"; then
             find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
               echo "$_1:"
