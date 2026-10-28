@@ -177,7 +177,7 @@ class _PeerCardState extends State<_PeerCard>
                   child: Column(
                     children: [
                       Row(children: [
-                        getOnline(isPortrait ? 4 : 8, peer.online),
+                        getOnline(8, peer.online),
                         Expanded(
                             child: Text(
                           peer.alias.isEmpty ? formatID(peer.id) : peer.alias,
@@ -1339,13 +1339,25 @@ void _rdpDialog(String id) async {
 }
 
 Widget getOnline(double rightPadding, bool online) {
-  return Tooltip(
-      message: translate(online ? 'Online' : 'Offline'),
-      waitDuration: const Duration(seconds: 1),
-      child: Padding(
-          padding: EdgeInsets.fromLTRB(0, 4, rightPadding, 4),
-          child: CircleAvatar(
-              radius: 3, backgroundColor: online ? Colors.green : kColorWarn)));
+  return Builder(builder: (context) {
+    final onDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: EdgeInsets.only(right: rightPadding),
+      child: Text(
+        translate(online ? 'Online' : 'Offline'),
+        maxLines: 1,
+        softWrap: false,
+        style: TextStyle(
+          color: online
+              ? (onDark ? const Color(0xFF69F0AE) : const Color(0xFF2E7D32))
+              : kColorWarn,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          height: 1.0,
+        ),
+      ),
+    );
+  });
 }
 
 Widget build_more(BuildContext context, {bool invert = false}) {
